@@ -25,7 +25,10 @@ class Game extends Component {
   constructor(props) {
     super(props);
 
-    this.state = Game.getInitializeState(props.height, props.width);
+    this.state = {
+      ...Game.getInitializeState(props.height, props.width),
+      iterationInterval: 500,
+    };
   }
 
   componentWillUnmount() {
@@ -51,20 +54,27 @@ class Game extends Component {
   play = () => {
     this.stop();
 
-    this.timer = setInterval(() => {
+    this.timer = setTimeout(() => {
       this.nextIteration();
-    }, 500);
+      this.play();
+    }, this.state.iterationInterval);
   };
 
   stop = () => {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
     }
-  }
+  };
+
+  setIterationInterval = (interval) => {
+    this.setState({
+      iterationInterval: interval,
+    });
+  };
 
   render() {
     const { height, width } = this.props;
-    const { board, iterations } = this.state;
+    const { board, iterations, iterationInterval } = this.state;
 
     return (
       <Main
@@ -105,6 +115,8 @@ class Game extends Component {
             initialize={this.initialize}
             play={this.play}
             stop={this.stop}
+            iterationInterval={iterationInterval}
+            setIterationInterval={this.setIterationInterval}
           />
           <Display iterations={iterations} />
         </Div>
