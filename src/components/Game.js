@@ -3,6 +3,7 @@ import { Main, Div } from 'glamorous';
 import { Range, List } from 'immutable';
 import Cell from './Cell';
 import Controls from './Controls';
+import Display from './Display';
 
 class Game extends Component {
   static defaultProps = {
@@ -27,6 +28,10 @@ class Game extends Component {
     this.state = Game.getInitializeState(props.height, props.width);
   }
 
+  componentWillUnmount() {
+    this.stop();
+  }
+
   initialize = () => {
     this.setState(Game.getInitializeState(this.props.height, this.props.width));
   };
@@ -42,6 +47,20 @@ class Game extends Component {
       iterations: iterations + 1,
     }));
   };
+
+  play = () => {
+    this.stop();
+
+    this.timer = setInterval(() => {
+      this.nextIteration();
+    }, 500);
+  };
+
+  stop = () => {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
 
   render() {
     const { height, width } = this.props;
@@ -79,10 +98,16 @@ class Game extends Component {
             />
           ))}
         </Div>
-        <Controls
-          nextIteration={this.nextIteration}
-          initialize={this.initialize}
-        />
+
+        <Div display="flex" justifyContent="space-between">
+          <Controls
+            nextIteration={this.nextIteration}
+            initialize={this.initialize}
+            play={this.play}
+            stop={this.stop}
+          />
+          <Display iterations={iterations} />
+        </Div>
       </Main>
     );
   }
