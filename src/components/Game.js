@@ -4,6 +4,7 @@ import { Range, List } from 'immutable';
 import Cell from './Cell';
 import Controls from './Controls';
 import Display from './Display';
+import { neighborsSelector, sumLivingNeighbors } from '../utils';
 
 class Game extends Component {
   static defaultProps = {
@@ -12,12 +13,9 @@ class Game extends Component {
   };
 
   static getInitializeState = (height, width) => ({
-    board: Range(0, height * width).map(i => ({
-      isLiving: Number(Math.random() >= 0.8),
-      row: Math.floor(i / width),
-      col: i % width,
-      index: i,
-    })).toList(),
+    board: Range(0, height * width)
+      .map(cell => Number(Math.random() >= 0.8))
+      .toList(),
     iterations: 0,
     history: List(),
   });
@@ -39,15 +37,16 @@ class Game extends Component {
     this.setState(Game.getInitializeState(this.props.height, this.props.width));
   };
 
-  setLiving = (index, isLiving) => {
-    this.setState(({ board }) => ({
-      board: board.update(index, cell => ({ ...cell, isLiving })),
-    }));
-  };
-
   nextIteration = () => {
-    this.setState(({ iterations }) => ({
+    this.setState(({ iterations, board }) => ({
       iterations: iterations + 1,
+      board: board.map((isLiving, index) => {
+        const livingNeighbors = sumLivingNeighbors(neighborsSelector(this.state, this.props, index));
+
+        return isLiving
+          ? Number(livingNeighbors === 2 || livingNeighbors === 3)
+          : Number(livingNeighbors === 3)
+      }),
     }));
   };
 
@@ -88,23 +87,10 @@ class Game extends Component {
           gridTemplateRows={`repeat(${height}, 1fr)`}
           gridTemplateColumns={`repeat(${width}, 1fr)`}
         >
-          {board.map(({ row, col, index, isLiving }) => (
+          {board.map((isLiving, index) => (
             <Cell
               key={index}
-              index={index}
               isLiving={isLiving}
-              iterations={iterations}
-              neighbors={{
-                topLeft: (col !== 0 && row !== 0) ? board.get(index - width - 1) : null,
-                top: row !== 0 ? board.get(index - width) : null,
-                topRight: (col !== width - 1 && row !== 0) ? board.get(index - width + 1) : null,
-                left: col !== 0 ? board.get(index - 1) : null,
-                right: col !== width -1 ? board.get(index + 1) : null,
-                bottomLeft: (col !== 0 && row !== height - 1) ? board.get(index + width - 1) : null,
-                bottom: row !== height - 1 ? board.get(index + width) : null,
-                bottomRight: (col !== width - 1 && row !== height - 1) ? board.get(index + width + 1) : null,
-              }}
-              setLiving={this.setLiving}
             />
           ))}
         </Div>
