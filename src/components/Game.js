@@ -45,9 +45,9 @@ class Game extends Component {
   nextIteration = () => {
     this.setState(({ iterations, board, history, height, width }) => {
       let isChanged = false;
-
+      
       const nextBoard = board.map((isLiving, index) => {
-        const livingNeighbors = sumLivingNeighbors(neighborsSelector(board, { height, width }, index));
+        const livingNeighbors = sumLivingNeighbors(neighborsSelector(height, width, index), board);
 
         const isLivingNext = isLiving
           ? Number(livingNeighbors === 2 || livingNeighbors === 3)
@@ -113,6 +113,12 @@ class Game extends Component {
     });
   };
 
+  setSize = (size) => {
+    this.setState(size, () => {
+      this.initialize();
+    });
+  };
+
   render() {
     const { board, height, width, iterations, iterationInterval } = this.state;
 
@@ -130,7 +136,7 @@ class Game extends Component {
         >
           {board.map((isLiving, index) => (
             <Cell
-              key={index}
+              key={`${height}-${width}-${index}`}
               isLiving={isLiving}
             />
           ))}
@@ -138,6 +144,9 @@ class Game extends Component {
 
         <Div display="flex" justifyContent="space-between">
           <Controls
+            height={height}
+            width={width}
+            setSize={this.setSize}
             nextIteration={this.nextIteration}
             prevIteration={this.prevIteration}
             initialize={this.initialize}

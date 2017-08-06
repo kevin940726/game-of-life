@@ -1,9 +1,8 @@
 import { createSelector } from 'reselect';
 
-const indexSelector = (board, size, index) => index;
-const widthSelector = (board, size) => size.width;
-const heightSelector = (board, size) => size.height;
-const boardSelector = board => board;
+const indexSelector = (height, width, index) => index;
+const widthSelector = (height, width) => width;
+const heightSelector = height => height;
 
 const rowColSelector = createSelector(
   indexSelector,
@@ -19,26 +18,25 @@ export const neighborsSelector = createSelector(
   indexSelector,
   widthSelector,
   heightSelector,
-  boardSelector,
-  ({ row, col }, index, width, height, board) => ([
+  ({ row, col }, index, width, height) => ([
     // topLeft
-    (col !== 0 && row !== 0) ? board.get(index - width - 1) : null,
+    (col !== 0 && row !== 0) ? (index - width - 1) : null,
     // top
-    row !== 0 ? board.get(index - width) : null,
+    row !== 0 ? (index - width) : null,
     // topRight
-    (col !== width - 1 && row !== 0) ? board.get(index - width + 1) : null,
+    (col !== width - 1 && row !== 0) ? (index - width + 1) : null,
     // left
-    col !== 0 ? board.get(index - 1) : null,
+    col !== 0 ? (index - 1) : null,
     // right
-    col !== width -1 ? board.get(index + 1) : null,
+    col !== width -1 ? (index + 1) : null,
     // bottomLeft
-    (col !== 0 && row !== height - 1) ? board.get(index + width - 1) : null,
+    (col !== 0 && row !== height - 1) ? (index + width - 1) : null,
     // bottom
-    row !== height - 1 ? board.get(index + width) : null,
+    row !== height - 1 ? (index + width) : null,
     // bottomRight
-    (col !== width - 1 && row !== height - 1) ? board.get(index + width + 1) : null,
+    (col !== width - 1 && row !== height - 1) ? (index + width + 1) : null,
   ].filter(cell => cell !== null))
 );
 
-export const sumLivingNeighbors = neighbors => neighbors
-  .reduce((sum, cur) => sum + cur, 0);
+export const sumLivingNeighbors = (neighbors, board) => neighbors
+  .reduce((sum, index) => sum + board.get(index), 0);
