@@ -6,26 +6,30 @@ import Controls from './Controls';
 import Display from './Display';
 import { neighborsSelector, sumLivingNeighbors } from '../utils';
 
-class Game extends Component {
-  static defaultProps = {
-    height: 15,
-    width: 20,
-  };
+const DEFAULT_HEIGHT = 15;
+const DEFAULT_WIDTH = 20;
 
-  static getInitializeState = (height, width) => ({
-    board: Range(0, height * width)
+class Game extends Component {
+  static getInitializeState = (height, width) => {
+    const board = Range(0, height * width)
       .map(cell => Number(Math.random() >= 0.8))
-      .toList(),
-    iterations: 0,
-    history: List(),
-    isEnd: false,
-  });
+      .toList();
+
+    return {
+      board,
+      iterations: 0,
+      history: List([board]),
+      isEnd: false,
+    };
+  };
 
   constructor(props) {
     super(props);
 
     this.state = {
-      ...Game.getInitializeState(props.height, props.width),
+      ...Game.getInitializeState(DEFAULT_HEIGHT, DEFAULT_WIDTH),
+      height: DEFAULT_HEIGHT,
+      width: DEFAULT_WIDTH,
       iterationInterval: 500,
     };
   }
@@ -35,15 +39,15 @@ class Game extends Component {
   }
 
   initialize = () => {
-    this.setState(Game.getInitializeState(this.props.height, this.props.width));
+    this.setState(({ height, width }) => Game.getInitializeState(height, width));
   };
 
   nextIteration = () => {
-    this.setState(({ iterations, board, history }) => {
+    this.setState(({ iterations, board, history, height, width }) => {
       let isChanged = false;
 
       const nextBoard = board.map((isLiving, index) => {
-        const livingNeighbors = sumLivingNeighbors(neighborsSelector(this.state, this.props, index));
+        const livingNeighbors = sumLivingNeighbors(neighborsSelector(board, { height, width }, index));
 
         const isLivingNext = isLiving
           ? Number(livingNeighbors === 2 || livingNeighbors === 3)
@@ -56,6 +60,8 @@ class Game extends Component {
         return isLivingNext;
       });
 
+      const nextIterations = iterations + 1;
+
       if (!isChanged) {
         return {
           isEnd: true,
@@ -63,10 +69,10 @@ class Game extends Component {
       }
 
       return {
-        iterations: iterations + 1,
+        iterations: nextIterations,
         board: nextBoard,
-        history: history.set(iterations, board)
-          .take(iterations + 1),
+        history: history.set(nextIterations, nextBoard)
+          .take(nextIterations + 1),
       };
     });
   };
@@ -108,8 +114,7 @@ class Game extends Component {
   };
 
   render() {
-    const { height, width } = this.props;
-    const { board, iterations, iterationInterval } = this.state;
+    const { board, height, width, iterations, iterationInterval } = this.state;
 
     return (
       <Main

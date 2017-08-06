@@ -1,9 +1,9 @@
 import { createSelector } from 'reselect';
 
-const indexSelector = (state, props, index) => index;
-const widthSelector = (state, props) => props.width;
-const heightSelector = (state, props) => props.height;
-const boardSelector = state => state.board;
+const indexSelector = (board, size, index) => index;
+const widthSelector = (board, size) => size.width;
+const heightSelector = (board, size) => size.height;
+const boardSelector = board => board;
 
 const rowColSelector = createSelector(
   indexSelector,
