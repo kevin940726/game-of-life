@@ -6,7 +6,6 @@
     "glamor": "^2.20.39",
     "glamorous": "^4.1.0",
     "immutable": "^3.8.1",
-    "lodash": "^4.17.4",
     "react": "next",
     "react-dom": "next",
     "react-scripts": "1.0.10",
