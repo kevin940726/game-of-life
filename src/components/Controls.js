@@ -9,6 +9,7 @@ class Controls extends PureComponent {
   render() {
     const {
       nextIteration,
+      prevIteration,
       initialize,
       play,
       stop,
@@ -18,6 +19,7 @@ class Controls extends PureComponent {
     return (
       <div>
         <button onClick={initialize}>new</button>
+        <button onClick={prevIteration}>prev</button>
         <button onClick={nextIteration}>next</button>
         <button onClick={play}>play</button>
         <button onClick={stop}>stop</button>

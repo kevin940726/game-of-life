@@ -38,7 +38,7 @@ class Game extends Component {
   };
 
   nextIteration = () => {
-    this.setState(({ iterations, board }) => ({
+    this.setState(({ iterations, board, history }) => ({
       iterations: iterations + 1,
       board: board.map((isLiving, index) => {
         const livingNeighbors = sumLivingNeighbors(neighborsSelector(this.state, this.props, index));
@@ -47,7 +47,20 @@ class Game extends Component {
           ? Number(livingNeighbors === 2 || livingNeighbors === 3)
           : Number(livingNeighbors === 3)
       }),
+      history: history.set(iterations, board)
+        .take(iterations + 1),
     }));
+  };
+
+  prevIteration = () => {
+    this.setState(({ iterations: curIterations, board, history }) => {
+      const iterations = curIterations < 1 ? 0 : curIterations - 1;
+
+      return {
+        iterations,
+        board: history.get(iterations),
+      };
+    });
   };
 
   play = () => {
@@ -98,6 +111,7 @@ class Game extends Component {
         <Div display="flex" justifyContent="space-between">
           <Controls
             nextIteration={this.nextIteration}
+            prevIteration={this.prevIteration}
             initialize={this.initialize}
             play={this.play}
             stop={this.stop}
