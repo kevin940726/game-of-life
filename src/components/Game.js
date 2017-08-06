@@ -119,6 +119,19 @@ class Game extends Component {
     });
   };
 
+  setIsLiving = (index) => {
+    this.setState(({ board, history }) => {
+      const nextBoard = board.update(index, cell => Number(!cell));
+
+      return {
+        board: nextBoard,
+        history: List(nextBoard),
+        iterations: 0,
+        isEnd: false,
+      };
+    });
+  };
+
   render() {
     const { board, height, width, iterations, iterationInterval } = this.state;
 
@@ -137,7 +150,9 @@ class Game extends Component {
           {board.map((isLiving, index) => (
             <Cell
               key={`${height}-${width}-${index}`}
+              index={index}
               isLiving={isLiving}
+              setIsLiving={this.setIsLiving}
             />
           ))}
         </Div>
