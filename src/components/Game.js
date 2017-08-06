@@ -40,15 +40,23 @@ class Game extends Component {
 
   nextIteration = () => {
     this.setState(({ iterations, board, history }) => {
+      let isChanged = false;
+
       const nextBoard = board.map((isLiving, index) => {
         const livingNeighbors = sumLivingNeighbors(neighborsSelector(this.state, this.props, index));
 
-        return isLiving
+        const isLivingNext = isLiving
           ? Number(livingNeighbors === 2 || livingNeighbors === 3)
-          : Number(livingNeighbors === 3)
+          : Number(livingNeighbors === 3);
+
+        if (isLivingNext !== isLiving) {
+          isChanged = true;
+        }
+
+        return isLivingNext;
       });
 
-      if (history.size && board.join('') === nextBoard.join('')) {
+      if (!isChanged) {
         return {
           isEnd: true,
         };
