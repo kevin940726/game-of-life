@@ -24,6 +24,7 @@ class Controls extends PureComponent {
       prevIteration,
       initialize,
       play,
+      autoplay,
       stop,
       iterationInterval,
     } = this.props;
@@ -56,6 +57,7 @@ class Controls extends PureComponent {
         <button onClick={prevIteration}>prev</button>
         <button onClick={nextIteration}>next</button>
         <button onClick={play}>play</button>
+        <button onClick={autoplay}>autoplay</button>
         <button onClick={stop}>stop</button>
         {' speed: '}
         <Input

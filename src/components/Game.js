@@ -6,8 +6,8 @@ import Controls from './Controls';
 import Display from './Display';
 import { neighborsSelector, sumLivingNeighbors } from '../utils';
 
-const DEFAULT_HEIGHT = 15;
-const DEFAULT_WIDTH = 20;
+const DEFAULT_HEIGHT = 20;
+const DEFAULT_WIDTH = 30;
 
 class Game extends Component {
   static getInitializeState = (height, width) => {
@@ -42,9 +42,9 @@ class Game extends Component {
     this.setState(({ height, width }) => Game.getInitializeState(height, width));
   };
 
-  nextIteration = () => {
+  nextIteration = (callback) => {
     this.setState(({ iterations, board, history, height, width }) => {
-      let isChanged = false;
+      let isChangedThroughHistory = history.map(() => false);
       
       const nextBoard = board.map((isLiving, index) => {
         const livingNeighbors = sumLivingNeighbors(neighborsSelector(height, width, index), board);
@@ -53,16 +53,17 @@ class Game extends Component {
           ? Number(livingNeighbors === 2 || livingNeighbors === 3)
           : Number(livingNeighbors === 3);
 
-        if (isLivingNext !== isLiving) {
-          isChanged = true;
-        }
+        isChangedThroughHistory = isChangedThroughHistory
+          .map((isChanged, historyIndex) => (
+            isLivingNext !== history.getIn([historyIndex, index]) || isChanged
+          ));
 
         return isLivingNext;
       });
 
       const nextIterations = iterations + 1;
 
-      if (!isChanged) {
+      if (isChangedThroughHistory.findLastIndex(isChanged => !isChanged) !== -1) {
         return {
           isEnd: true,
         };
@@ -74,7 +75,7 @@ class Game extends Component {
         history: history.set(nextIterations, nextBoard)
           .take(nextIterations + 1),
       };
-    });
+    }, typeof callback === 'function' ? callback : null);
   };
 
   prevIteration = () => {
@@ -88,17 +89,29 @@ class Game extends Component {
     });
   };
 
-  play = () => {
+  play = ({ isAuto } = { isAuto: false }) => {
     this.stop();
 
-    if (this.state.isEnd) {
+    if (!isAuto && this.state.isEnd) {
       return;
     }
 
     this.timer = setTimeout(() => {
-      this.nextIteration();
-      this.play();
+      this.nextIteration(() => {
+        if (isAuto && this.state.isEnd) {
+          this.initialize();
+          this.play({ isAuto });
+        }
+
+        this.play({ isAuto });
+      });
     }, this.state.iterationInterval);
+  };
+
+  autoplay = () => {
+    this.play({
+      isAuto: true,
+    });
   };
 
   stop = () => {
@@ -166,6 +179,7 @@ class Game extends Component {
             prevIteration={this.prevIteration}
             initialize={this.initialize}
             play={this.play}
+            autoplay={this.autoplay}
             stop={this.stop}
             iterationInterval={iterationInterval}
             setIterationInterval={this.setIterationInterval}
