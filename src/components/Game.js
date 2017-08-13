@@ -8,6 +8,7 @@ import { neighborsSelector, sumLivingNeighbors } from '../utils';
 
 const DEFAULT_HEIGHT = 20;
 const DEFAULT_WIDTH = 30;
+const AUTOPLAY_TIMEOUT = 3000;
 
 class Game extends Component {
   static getInitializeState = (height, width) => {
@@ -100,7 +101,6 @@ class Game extends Component {
       this.nextIteration(() => {
         if (isAuto && this.state.isEnd) {
           this.initialize();
-          this.play({ isAuto });
         }
 
         this.play({ isAuto });
